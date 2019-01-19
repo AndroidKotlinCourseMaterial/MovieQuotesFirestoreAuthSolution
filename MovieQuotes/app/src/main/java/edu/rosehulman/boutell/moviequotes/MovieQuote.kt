@@ -21,7 +21,4 @@ data class MovieQuote(
             return movieQuote
         }
     }
-
 }
-
-

@@ -1,18 +1,16 @@
 package edu.rosehulman.boutell.moviequotes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.dialog_add_edit_quote.view.*
 
-class MovieQuoteAdapter(val context: Context, val uid: String) : RecyclerView.Adapter<MovieQuoteViewHolder>() {
+class MovieQuoteAdapter(val context: Context, uid: String) : RecyclerView.Adapter<MovieQuoteViewHolder>() {
     private val movieQuotes = ArrayList<MovieQuote>()
     private val movieQuotesRef = FirebaseFirestore
         .getInstance()
@@ -23,37 +21,14 @@ class MovieQuoteAdapter(val context: Context, val uid: String) : RecyclerView.Ad
 
     fun addSnapshotListener() {
         listenerRegistration = movieQuotesRef
-
-            .orderBy(MovieQuote.LAST_TOUCHED_KEY)
+            .orderBy(MovieQuote.LAST_TOUCHED_KEY, Query.Direction.ASCENDING)
             .addSnapshotListener { querySnapshot, e ->
                 if (e != null) {
                     Log.w(Constants.TAG, "listen error", e)
-                    return@addSnapshotListener
+                } else {
+                    processSnapshotChanges(querySnapshot!!)
                 }
-//                populateLocalQuotes(querySnapshot!!)
-                processSnapshotChanges(querySnapshot!!)
             }
-    }
-
-    fun removeSnapshotListener() {
-        Log.d(Constants.TAG, "Removing listener")
-        listenerRegistration.remove()
-        //movieQuotes.clear()
-    }
-
-    fun populateLocalQuotes(querySnapshot: QuerySnapshot) {
-        // First attempt: just get them all.
-        Log.d(Constants.TAG, "Populating")
-        movieQuotes.clear()
-        for (document in querySnapshot.documents) {
-            // This is a very convenient helper method.
-            Log.d(Constants.TAG, "document: $document")
-            movieQuotes.add(MovieQuote.fromSnapshot(document))
-        }
-        notifyDataSetChanged()
-        if (movieQuotes.isNotEmpty()) {
-            Log.d(Constants.TAG, "ID of first: " + movieQuotes[0].id)
-        }
     }
 
     private fun processSnapshotChanges(querySnapshot: QuerySnapshot) {
@@ -69,25 +44,15 @@ class MovieQuoteAdapter(val context: Context, val uid: String) : RecyclerView.Ad
                 }
                 DocumentChange.Type.REMOVED -> {
                     Log.d(Constants.TAG, "Removing $movieQuote")
-//                    movieQuotes.remove(movieQuote)
-//                    notifyDataSetChanged()
-                    for ((k, mq) in movieQuotes.withIndex()) {
-                        if (mq.id == movieQuote.id) {
-                            movieQuotes.removeAt(k)
-                            notifyItemRemoved(k)
-                            break
-                        }
-                    }
+                    val index = movieQuotes.indexOfFirst { it.id == movieQuote.id }
+                    movieQuotes.removeAt(index)
+                    notifyItemRemoved(index)
                 }
                 DocumentChange.Type.MODIFIED -> {
                     Log.d(Constants.TAG, "Modifying $movieQuote")
-                    for ((k, mq) in movieQuotes.withIndex()) {
-                        if (mq.id == movieQuote.id) {
-                            movieQuotes[k] = movieQuote
-                            notifyItemChanged(k)
-                            break
-                        }
-                    }
+                    val index = movieQuotes.indexOfFirst { it.id == movieQuote.id }
+                    movieQuotes[index] = movieQuote
+                    notifyItemChanged(index)
                 }
             }
         }
@@ -107,6 +72,7 @@ class MovieQuoteAdapter(val context: Context, val uid: String) : RecyclerView.Ad
 
     override fun getItemCount() = movieQuotes.size
 
+    @SuppressLint("InflateParams")
     fun showAddEditDialog(position: Int = -1) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Add a quote")

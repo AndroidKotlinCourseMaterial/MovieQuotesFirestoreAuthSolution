@@ -1,6 +1,5 @@
 package edu.rosehulman.boutell.moviequotes
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -11,7 +10,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -44,6 +42,7 @@ class MainActivity : AppCompatActivity(),
         // TODO: Create an AuthStateListener that passes the UID
         // to the MovieQuoteFragment if the user is logged in
         // and goes back to the Splash fragment otherwise.
+        // See https://firebase.google.com/docs/auth/users#the_user_lifecycle
         authListener = FirebaseAuth.AuthStateListener { auth ->
             val user = auth.currentUser
             Log.d(Constants.TAG, "In auth listener, User: $user")

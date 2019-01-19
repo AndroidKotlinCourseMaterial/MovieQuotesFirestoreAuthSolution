@@ -9,7 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-private val ARG_UID = "UID"
+private const val ARG_UID = "UID"
 
 class MovieQuoteFragment : Fragment() {
     private var uid: String? = null
@@ -26,7 +26,6 @@ class MovieQuoteFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val recyclerView = inflater.inflate(R.layout.fragment_movie_quote, container, false) as RecyclerView
         adapter = MovieQuoteAdapter(context!!, uid!!)
         recyclerView.layoutManager = LinearLayoutManager(context)
