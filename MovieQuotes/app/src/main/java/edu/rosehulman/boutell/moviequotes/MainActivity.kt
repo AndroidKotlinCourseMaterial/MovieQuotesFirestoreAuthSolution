@@ -83,10 +83,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAppTitle() {
-        var author = ""
         settingsRef.get()
             .addOnSuccessListener { document ->
-                author = (document["author"] ?: "") as String
+                var author = (document["author"] ?: "") as String
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("App Author")
                 val authorEditText = EditText(this)
