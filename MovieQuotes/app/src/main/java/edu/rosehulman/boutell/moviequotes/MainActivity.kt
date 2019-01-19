@@ -17,28 +17,65 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(),
     SplashFragment.OnLoginButtonPressedListener {
 
+    val auth = FirebaseAuth.getInstance()
+    lateinit var authListener: FirebaseAuth.AuthStateListener
+    private val RC_SIGN_IN = 1
+
     override fun onLoginButtonPressed() {
         launchLoginUI()
     }
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val ft = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.fragment_container, SplashFragment())
-        ft.commit()
-
-
+        initializeListeners()
+        // switchToSplashFragment()
 
         fab.setOnClickListener {
             // adapter.showAddEditDialog()
         }
-
     }
 
-    private val RC_SIGN_IN = 1
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authListener)
+    }
+
+    private fun initializeListeners() {
+        authListener = FirebaseAuth.AuthStateListener { auth ->
+            val user = auth.currentUser
+            Log.d(Constants.TAG, "In auth listener, User: $user")
+            if (user != null) {
+                Log.d(Constants.TAG, "UID: ${user.uid}")
+                Log.d(Constants.TAG, "Name: ${user.displayName}")
+                Log.d(Constants.TAG, "Email: ${user.email}")
+                Log.d(Constants.TAG, "Photo: ${user.photoUrl}")
+                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
+                switchToMovieQuoteFragment(user.uid)
+            } else {
+                switchToSplashFragment()
+            }
+        }
+    }
+
+    private fun switchToMovieQuoteFragment(uid: String) {
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, MovieQuoteFragment())
+        ft.commit()
+    }
+
+    private fun switchToSplashFragment() {
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, SplashFragment())
+        ft.commit()
+    }
 
     private fun launchLoginUI() {
         // Choose authentication providers
@@ -57,26 +94,22 @@ class MainActivity : AppCompatActivity(),
         startActivityForResult(loginIntent, RC_SIGN_IN)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == Activity.RESULT_OK) {
-                val user = FirebaseAuth.getInstance().currentUser!!
-                Log.d(Constants.TAG, "UID: ${user.uid}")
-                Log.d(Constants.TAG, "Name: ${user.displayName}")
-                Log.d(Constants.TAG, "Email: ${user.email}")
-                Log.d(Constants.TAG, "Photo: ${user.photoUrl}")
-                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
-            } else {
-                val response = IdpResponse.fromResultIntent(data)
-                if (response == null) {
-                    Log.e(Constants.TAG, "User pressed back: $response")
-                }
-                Log.e(Constants.TAG, "Login error: ${response?.error?.errorCode}")
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if (requestCode == RC_SIGN_IN) {
+//            if (resultCode == Activity.RESULT_OK) {
+//                val user = auth.currentUser!!
+//            } else {
+//                val response = IdpResponse.fromResultIntent(data)
+//                if (response == null) {
+//                    Log.e(Constants.TAG, "User pressed back: $response")
+//                }
+//                Log.e(Constants.TAG, "Login error: ${response?.error?.errorCode}")
+//                switchToSplashFragment()
+//            }
+//        }
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -89,6 +122,10 @@ class MainActivity : AppCompatActivity(),
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_logout -> {
+                auth.signOut()
+                true
+            }
             R.id.action_increase_font_size -> {
                 changeFontSize(4)
                 true
@@ -143,5 +180,4 @@ class MainActivity : AppCompatActivity(),
         }
         builder.create().show()
     }
-
 }
