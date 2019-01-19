@@ -6,56 +6,36 @@ import android.os.Bundle
 import android.provider.Settings
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var adapter: MovieQuoteAdapter
-    private lateinit var settingsRef: DocumentReference
+class MainActivity : AppCompatActivity(),
+    SplashFragment.OnLoginButtonPressedListener {
 
-
+    override fun onLoginButtonPressed() {
+        launchLoginUI()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        launchLoginUI()
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, SplashFragment())
+        ft.commit()
 
-        settingsRef = FirebaseFirestore
-            .getInstance()
-            .collection("settings").document("settings")
+
 
         fab.setOnClickListener {
-            // For testing
-            // adapter.add(MovieQuote("Quote", "Movie"))
-            adapter.showAddEditDialog()
+            // adapter.showAddEditDialog()
         }
 
-        settingsRef.addSnapshotListener { document, exception ->
-            if (exception != null) {
-                Log.w(Constants.TAG, "listen error", exception)
-                return@addSnapshotListener
-            }
-            author_text_view.text = (document?.get("author") ?: "") as String
-        }
-
-        adapter = MovieQuoteAdapter(this)
-        recycler_view.layoutManager = LinearLayoutManager(this)
-        recycler_view.setHasFixedSize(true)
-        recycler_view.adapter = adapter
-        adapter.addSnapshotListener()
     }
 
     private val RC_SIGN_IN = 1
@@ -65,7 +45,8 @@ class MainActivity : AppCompatActivity() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.PhoneBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build())
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
 
         val loginIntent = AuthUI.getInstance()
             .createSignInIntentBuilder()
@@ -117,8 +98,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_settings -> {
-                updateAppTitle()
-//                getWhichSettings()
+                getWhichSettings()
                 true
             }
             R.id.action_clear -> {
@@ -129,27 +109,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateAppTitle() {
-        settingsRef.get()
-            .addOnSuccessListener { document ->
-                var author = (document["author"] ?: "") as String
-                val builder = AlertDialog.Builder(this)
-                builder.setTitle("App Author")
-                val authorEditText = EditText(this)
-                authorEditText.setText(author)
-                authorEditText.hint = "App author's name"
-                builder.setView(authorEditText)
-                builder.setPositiveButton(android.R.string.ok) { _, _ ->
-                    author = authorEditText.text.toString()
-                    Log.d(Constants.TAG, "Author: $author")
-                    val map = mapOf<String, Any>(Pair("author", author))
-                    settingsRef.set(map, SetOptions.merge())
-                }
-                builder.create().show()
-            } .addOnFailureListener {exception ->
-                Log.e(Constants.TAG, "Get error: $exception")
-            }
-    }
 
     private fun changeFontSize(delta: Int) {
         // Increase the font size by delta sp
