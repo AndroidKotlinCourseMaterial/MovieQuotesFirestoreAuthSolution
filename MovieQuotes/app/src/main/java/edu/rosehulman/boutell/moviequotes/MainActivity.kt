@@ -81,8 +81,12 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == Activity.RESULT_OK) {
-                val user = FirebaseAuth.getInstance().currentUser
-                // ...
+                val user = FirebaseAuth.getInstance().currentUser!!
+                Log.d(Constants.TAG, "UID: ${user.uid}")
+                Log.d(Constants.TAG, "Name: ${user.displayName}")
+                Log.d(Constants.TAG, "Email: ${user.email}")
+                Log.d(Constants.TAG, "Photo: ${user.photoUrl}")
+                Log.d(Constants.TAG, "Phone: ${user.phoneNumber}")
             } else {
                 val response = IdpResponse.fromResultIntent(data)
                 if (response == null) {
