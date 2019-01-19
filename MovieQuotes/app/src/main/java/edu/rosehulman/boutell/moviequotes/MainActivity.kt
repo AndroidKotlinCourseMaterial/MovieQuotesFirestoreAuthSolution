@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -21,23 +22,14 @@ class MainActivity : AppCompatActivity(),
     lateinit var authListener: FirebaseAuth.AuthStateListener
     private val RC_SIGN_IN = 1
 
-    override fun onLoginButtonPressed() {
-        launchLoginUI()
-    }
-    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
         initializeListeners()
-        // switchToSplashFragment()
-
-        fab.setOnClickListener {
-            // adapter.showAddEditDialog()
-        }
     }
 
+    // TODO: add (and remove) an auth state listener upon start (and stop).
     override fun onStart() {
         super.onStart()
         auth.addAuthStateListener(authListener)
@@ -49,6 +41,9 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun initializeListeners() {
+        // TODO: Create an AuthStateListener that passes the UID
+        // to the MovieQuoteFragment if the user is logged in
+        // and goes back to the Splash fragment otherwise.
         authListener = FirebaseAuth.AuthStateListener { auth ->
             val user = auth.currentUser
             Log.d(Constants.TAG, "In auth listener, User: $user")
@@ -65,20 +60,25 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun switchToMovieQuoteFragment(uid: String) {
-        val ft = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.fragment_container, MovieQuoteFragment())
-        ft.commit()
-    }
-
     private fun switchToSplashFragment() {
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.fragment_container, SplashFragment())
         ft.commit()
     }
 
+    private fun switchToMovieQuoteFragment(uid: String) {
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, MovieQuoteFragment.newInstance(uid))
+        ft.commit()
+    }
+
+    override fun onLoginButtonPressed() {
+        launchLoginUI()
+    }
+
     private fun launchLoginUI() {
-        // Choose authentication providers
+        // TODO: Build a login intent and startActivityForResult(intent, ...)
+        // For details, see https://firebase.google.com/docs/auth/android/firebaseui#sign_in
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.PhoneBuilder().build(),
@@ -94,22 +94,9 @@ class MainActivity : AppCompatActivity(),
         startActivityForResult(loginIntent, RC_SIGN_IN)
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//
-//        if (requestCode == RC_SIGN_IN) {
-//            if (resultCode == Activity.RESULT_OK) {
-//                val user = auth.currentUser!!
-//            } else {
-//                val response = IdpResponse.fromResultIntent(data)
-//                if (response == null) {
-//                    Log.e(Constants.TAG, "User pressed back: $response")
-//                }
-//                Log.e(Constants.TAG, "Login error: ${response?.error?.errorCode}")
-//                switchToSplashFragment()
-//            }
-//        }
-//    }
+    fun getFab(): FloatingActionButton {
+        return fab
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -123,6 +110,7 @@ class MainActivity : AppCompatActivity(),
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_logout -> {
+                // TODO: Sign out.
                 auth.signOut()
                 true
             }

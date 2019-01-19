@@ -12,10 +12,12 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.dialog_add_edit_quote.view.*
 
-class MovieQuoteAdapter(var context: Context) : RecyclerView.Adapter<MovieQuoteViewHolder>() {
+class MovieQuoteAdapter(val context: Context, val uid: String) : RecyclerView.Adapter<MovieQuoteViewHolder>() {
     private val movieQuotes = ArrayList<MovieQuote>()
     private val movieQuotesRef = FirebaseFirestore
         .getInstance()
+        .collection(Constants.USERS_COLLECTION)
+        .document(uid)
         .collection(Constants.QUOTES_COLLECTION)
     private lateinit var listenerRegistration: ListenerRegistration
 
