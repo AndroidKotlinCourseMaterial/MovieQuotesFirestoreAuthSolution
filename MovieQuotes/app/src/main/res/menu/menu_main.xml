@@ -3,17 +3,22 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="edu.rosehulman.boutell.moviequotes.MainActivity">
     <item
+            android:id="@+id/action_logout"
+            android:orderInCategory="100"
+            android:title="Logout"
+            app:showAsAction="never"/>
+    <item
             android:id="@+id/action_settings"
             android:orderInCategory="100"
             android:title="@string/action_settings"
-            app:showAsAction="never" />
+            app:showAsAction="never"/>
     <item
             android:id="@+id/action_increase_font_size"
             android:orderInCategory="10"
             android:title="@string/increase_font_size"
             android:titleCondensed="Up"
             android:icon="@android:drawable/arrow_up_float"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never"/>
 
     <item
             android:id="@+id/action_decrease_font_size"
@@ -21,7 +26,7 @@
             android:title="@string/decrease_font_size"
             android:titleCondensed="Down"
             android:icon="@android:drawable/arrow_down_float"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never"/>
 
     <item
             android:id="@+id/action_clear"
@@ -29,5 +34,5 @@
             android:title="@string/clear_quote"
             android:titleCondensed="@string/clear_condensed"
             android:icon="@drawable/ic_clear"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never"/>
 </menu>

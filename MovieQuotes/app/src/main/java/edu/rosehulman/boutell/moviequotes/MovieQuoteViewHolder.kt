@@ -8,10 +8,10 @@ import android.view.View
 import android.widget.TextView
 import kotlinx.android.synthetic.main.row_view.view.*
 
-class MovieQuoteViewHolder(itemView: View, val adapter: MovieQuoteAdapter): RecyclerView.ViewHolder(itemView) {
-    val quoteTextView: TextView = itemView.findViewById(R.id.quote_text_view)
-    val movieTextView: TextView = itemView.findViewById(R.id.movie_text_view)
-    var cardView: CardView
+class MovieQuoteViewHolder(itemView: View, private val adapter: MovieQuoteAdapter): RecyclerView.ViewHolder(itemView) {
+    private val quoteTextView: TextView = itemView.findViewById(R.id.quote_text_view)
+    private val movieTextView: TextView = itemView.findViewById(R.id.movie_text_view)
+    private var cardView: CardView
 
     init {
         itemView.setOnClickListener {
